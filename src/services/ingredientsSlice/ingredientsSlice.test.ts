@@ -1,13 +1,11 @@
-import ingredientsReducer, { getIngredients } from './ingredientsSlice';
+import ingredientsReducer, {
+  getIngredients,
+  initialState
+} from './ingredientsSlice';
 import { TIngredient } from '@utils-types';
 import { RequestStatus } from '@utils-types';
 
 describe('ingredientsSlice', () => {
-  const initialState = {
-    data: [],
-    status: RequestStatus.Idle
-  };
-
   const testIngredients: TIngredient[] = [
     {
       _id: '1',
@@ -43,7 +41,7 @@ describe('ingredientsSlice', () => {
 
   test('Обработка getIngredients.pending', () => {
     const action = { type: getIngredients.pending.type };
-    const state = ingredientsReducer(initialState, action);
+    const state = ingredientsReducer(initialState, action); 
     expect(state.status).toBe(RequestStatus.Loading);
   });
 

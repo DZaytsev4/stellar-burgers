@@ -2,9 +2,6 @@ describe('Страница конструктора бургера', () => {
   const testUrl = 'http://localhost:4000';
   const modalSelector = '[data-cy="modal"]';
   const constructorSelector = '[data-cy="constructor"]';
-  const ingredientItemSelector = '[data-cy="ingredient-item"]';
-  const addButtonSelector = 'button:contains("Добавить")';
-  const orderSummButtonSelector = '[data-cy="order-summ"] button';
 
   beforeEach(() => {
     cy.intercept('GET', 'api/ingredients', {
@@ -46,18 +43,17 @@ describe('Страница конструктора бургера', () => {
   it('Добавление ингредиентов из списка в конструктор', () => {
     cy.visit(testUrl);
     cy.wait('@getIngredients');
-    // Добавление булок
-    cy.get(`${ingredientItemSelector}-bun ${addButtonSelector}`).first().click();
+    cy.get('[data-ing="ingredient-item-bun"]').contains('Добавить').click();
     cy.get('[data-cy="constructor-bun-1"]').should('exist');
     cy.get('[data-cy="constructor-bun-2"]').should('exist');
 
     // Добавление других ингредиентов
-    cy.get(`${ingredientItemSelector}-main ${addButtonSelector}`)
-      .first().click({ force: true });
+    cy.get('[data-ing="ingredient-item-main"]')
+      .contains('Добавить')
+      .click({ force: true });
     cy.get('[data-cy="constructor-topping"]').should('exist');
 
-    cy.get(`${ingredientItemSelector}-sauce ${addButtonSelector}`)
-      .first().click();
+    cy.get('[data-ing="ingredient-item-sauce"]').contains('Добавить').click();
     cy.get('[data-cy="constructor-topping"]').should('exist');
   });
 
@@ -65,8 +61,8 @@ describe('Страница конструктора бургера', () => {
     cy.visit(testUrl);
     cy.wait('@getIngredients');
 
-    //открытие
-    cy.get(`${ingredientItemSelector}-1`).click();
+    // открытие
+    cy.get('[data-cy="ingredient-item-1"]').click();
     cy.get(modalSelector).should('be.visible');
 
     // закрытие по клику на крестик
@@ -78,11 +74,11 @@ describe('Страница конструктора бургера', () => {
     cy.visit(testUrl);
     cy.wait('@getIngredients');
 
-    //открытие
-    cy.get(`${ingredientItemSelector}-2`).click();
+    // открытие
+    cy.get('[data-cy="ingredient-item-2"]').click();
     cy.get(modalSelector).should('be.visible');
 
-    // Закрытие по клику на оверлей
+    // закрытие по клику на оверлей
     cy.get('[data-cy="modal-overlay"]').click('topRight', { force: true });
     cy.get(modalSelector).should('not.exist');
   });
@@ -90,25 +86,23 @@ describe('Страница конструктора бургера', () => {
   it('Создание заказа', () => {
     cy.visit(testUrl);
     cy.wait('@getIngredients');
-    cy.get(`${ingredientItemSelector}-bun ${addButtonSelector}`).first().click();
-    cy.get(`${ingredientItemSelector}-main ${addButtonSelector}`).first().click();
-    cy.get(`${ingredientItemSelector}-sauce ${addButtonSelector}`).first().click();
+    cy.get('[data-ing="ingredient-item-bun"]').contains('Добавить').click();
+    cy.get('[data-ing="ingredient-item-main"]').contains('Добавить').click();
+    cy.get('[data-ing="ingredient-item-sauce"]').contains('Добавить').click();
 
-    // Вызывается клик по кнопке «Оформить заказ»
-    cy.get(orderSummButtonSelector).click();
+    // Вызывается клик по кнопке «Оформить заказ».
+    cy.get('[data-cy=order-summ] button').click();
 
-    // Проверяем что модальное окно открылось
+    // Проверяется, что модальное окно открылось и номер заказа верный.
     cy.get(modalSelector).contains('45567').should('exist');
 
-    // Закрываем модальное окно
+    // Закрывается модальное окно и проверяется успешность закрытия.
     cy.get('[data-cy="modal-close-btn"]').click();
     cy.get(modalSelector).should('not.exist');
 
-    // Проверяем что конструктор пуст (одна проверка вместо трех)
-    cy.get(constructorSelector).within(() => {
-      cy.contains('Ингредиент 1').should('not.exist');
-      cy.contains('Ингредиент 3').should('not.exist');
-      cy.contains('Ингредиент 4').should('not.exist');
-    });
+    // Проверяется, что конструктор пуст.
+    cy.get(constructorSelector).contains('Ингредиент 1').should('not.exist');
+    cy.get(constructorSelector).contains('Ингредиент 3').should('not.exist');
+    cy.get(constructorSelector).contains('Ингредиент 4').should('not.exist');
   });
 });
